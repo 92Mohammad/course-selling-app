@@ -2,22 +2,21 @@ require('dotenv').config();
 
 const express = require('express');
 const app =  express();
+const connection = require('./DbConnection')
 const {readFile, writeFile} = require('fs').promises;
 const path = require('path');
 const cookieParser = require('cookie-parser')
-const PORT = 8080;
 const cors = require('cors');
 const  jwt  = require('jsonwebtoken');
 const { auth } = require('./middleware.js');
 const { createAccessToken, createRefreshToken} = require('./token.js');
-const { FaEraser } = require('react-icons/fa6');
 
 
 let Admins = [];
 let Courses = [];
 let RefreshTokens = [];
-const colorArray =  ['#a3c2c2', '#c2c2a3', '#e0b3ff', '#b3cce6', ' #99e6e6'];
-
+const colorArray =  ['#a3c2c2', '#cbcb44', '#e0b3ff', '#b3cce6', ' #99e6e6'];
+//
 let adminDataBasePath = path.join(__dirname + '/database/admin.json');
 let courseDataBasePath = path.join(__dirname + '/database/courses.json')
 let tokenDataBasePath = path.join(__dirname + '/database/token.json')
@@ -27,15 +26,19 @@ app.use(cors());
 app.use(cookieParser());
 
 
-app.get('/', async (req, res) => {  
+
+app.get('/', (req, res) => {
     res.send('Hello world')
 })
 
 
 app.post('/admin/signup', async(req, res) => {
     try {
-        const { adminName, email, password } = req.body;
+        const newUser = req.body;
+        if (newUser){
 
+
+        }
         const fileData = await readFile(adminDataBasePath, 'utf-8');
         Admins = JSON.parse(fileData);
         // check  whether the current admin email lies inside database or not if not then add this new admin to database.
@@ -49,7 +52,6 @@ app.post('/admin/signup', async(req, res) => {
                 email: email,
                 password: password,
             };
-
             Admins.push(newAdmin);
             const formatData = JSON.stringify(Admins, null, 2); 
             await writeFile(adminDataBasePath, formatData);
@@ -57,8 +59,7 @@ app.post('/admin/signup', async(req, res) => {
 
         }
         else if(adminName === isAdminFound.name){
-            return res.send({message: "user naem already exist"})
-
+            return res.send({message: "user name already exist"})
         }
         else{
             return res.send({message: 'Email already exist'});
@@ -273,9 +274,12 @@ app.get('/refresh/token', async(req, res) => {
     catch(error){
         console.log(error);
     }
-
 })
 
+app.listen(process.env.PORT, async() => {
+    await connection();
+    console.log(`server is running on port ${process.env.PORT}`)
+});
 
-app.listen(PORT, () => console.log(`server is running on port ${PORT}`))
+
 

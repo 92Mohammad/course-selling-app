@@ -40,8 +40,6 @@ export const AddNewCourse = () => {
         }
     }
 
-    
-
     return (
         <main className="add-new-course-section">
             <Button 
