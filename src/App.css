@@ -1,0 +1,25 @@
+.links{
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color:   #4d4d4d;
+    font-family: Nunito Sans,  sans-serif;
+    padding: 12px;  
+    margin-bottom: 3px;
+}
+.icons{
+    font-size: 25px;
+    margin-right: 8px;
+}
+
+.links:hover{
+    background: #d3cce5;
+}
+
+.logout-btn:hover{
+    background: #d3cce5 !important;
+    
+}
+.default-link:focus{
+    background: #d3cce5 !important;
+}
