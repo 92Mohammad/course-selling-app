@@ -3,8 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const app =  express();
 const connection = require('./DbConnection')
-const {readFile, writeFile} = require('fs').promises;
-const path = require('path');
+const { Admin, Course} = require('./models/course.models')
+
 const cookieParser = require('cookie-parser')
 const cors = require('cors');
 const  jwt  = require('jsonwebtoken');
@@ -12,14 +12,7 @@ const { auth } = require('./middleware.js');
 const { createAccessToken, createRefreshToken} = require('./token.js');
 
 
-let Admins = [];
-let Courses = [];
-let RefreshTokens = [];
 const colorArray =  ['#a3c2c2', '#cbcb44', '#e0b3ff', '#b3cce6', ' #99e6e6'];
-//
-let adminDataBasePath = path.join(__dirname + '/database/admin.json');
-let courseDataBasePath = path.join(__dirname + '/database/courses.json')
-let tokenDataBasePath = path.join(__dirname + '/database/token.json')
 
 app.use(express.json());
 app.use(cors());
@@ -34,35 +27,22 @@ app.get('/', (req, res) => {
 
 app.post('/admin/signup', async(req, res) => {
     try {
-        const newUser = req.body;
-        if (newUser){
-
-
+        const newAdmin = req.body;
+        if (newAdmin){
+            // first check whether admin exist or not
+            const isAdminExist = await Admin.findOne({name : newAdmin.name});
+            console.log("hello: ", isAdminExist);
+            if (isAdminExist){
+                return res.status(404).json({message: "Admin already exist"});
+            }
+            else {
+                // then create new admin in database
+                const admin = await Admin.create(newAdmin);
+                return res.status(200).json({message: "Admin created successfully"});
+            }
         }
-        const fileData = await readFile(adminDataBasePath, 'utf-8');
-        Admins = JSON.parse(fileData);
-        // check  whether the current admin email lies inside database or not if not then add this new admin to database.
-        const isAdminFound = Admins.find((admin) => admin.email === email);
-        // check also for adminName
-
-        if (!isAdminFound){
-            const newAdmin = {
-                adminId: Date.now().toString(),
-                name: adminName,
-                email: email,
-                password: password,
-            };
-            Admins.push(newAdmin);
-            const formatData = JSON.stringify(Admins, null, 2); 
-            await writeFile(adminDataBasePath, formatData);
-            return res.send({message: 'Admin created successfully'});
-
-        }
-        else if(adminName === isAdminFound.name){
-            return res.send({message: "user name already exist"})
-        }
-        else{
-            return res.send({message: 'Email already exist'});
+        else {
+            console.log("hello world");
         }
     }
     catch(error){
@@ -73,30 +53,30 @@ app.post('/admin/signup', async(req, res) => {
 
 app.post('/admin/login', async(req, res) => {
     try {
-        const { email, password } = req.body;
-        const fileData = await readFile(adminDataBasePath, 'utf-8');
-        Admins = JSON.parse(fileData); 
-        const admin = Admins.find((admin) => admin.email === email);
 
-        if (!admin){
-            return res.send({message: 'Email does not exist'});
-        }
-        else if (admin.password !== password){
-            return res.send({message: '!!Incorrect Password'});
+        const {email, password} = req.body;
+        const admin = await Admin.findOne({email});
+        if (admin){
+            console.log(admin.password);
+            if (admin.password === password){
+                const accessToken = createAccessToken(admin._id); // send it to the client
+                return res.status(200).json({accessToken: accessToken, message: 'Successfully login'});
+            }
+            else {
+                return res.status(404).json({message: "Incorrect password!!"});
+            }
         }
         else {
-            // create a json web token and send it back
-            const accessToken = createAccessToken(admin.adminId); // send it to the client
-            const refreshToken = createRefreshToken(admin.adminId); // store in into token.json and store it into cookies 
-            // write the refresh token with the current adminid in token database
-
-            RefreshTokens.push({adminId: admin.adminId, refreshToken});
-            const formatTokenArray = JSON.stringify(RefreshTokens, null, 2);
-            await writeFile(tokenDataBasePath, formatTokenArray);
-
-            // res.cookie('jwt', refreshToken , {httpOnly: true , maxAge: 24 * 60 * 60 * 1000});   
-            res.status(200).send({accessToken: accessToken, message: 'Successfully login'});
+            return res.status(404).send("admin not found")
         }
+
+        //     const accessToken = createAccessToken(admin.adminId); // send it to the client
+        //     const refreshToken = createRefreshToken(admin.adminId); // store in into token.json and store it into cookies
+
+        //     RefreshTokens.push({adminId: admin.adminId, refreshToken});
+        //     // res.cookie('jwt', refreshToken , {httpOnly: true , maxAge: 24 * 60 * 60 * 1000});
+        //     res.status(200).send({accessToken: accessToken, message: 'Successfully login'});
+        // }
     }
     catch(error){
         console.log(error);
@@ -107,16 +87,13 @@ app.post('/admin/login', async(req, res) => {
 app.get('/admin/me', auth, async(req, res) => {
     try {
         const adminId = req.adminId;
-        // find the user name based on the adminId and send it back to as a response
-        // first read the admin db file
-        const adminFileData = await readFile(adminDataBasePath, 'utf-8');
-        Admins = JSON.parse(adminFileData);
-        const findAdmin = Admins.find(admin => admin.adminId === adminId);
-        if (findAdmin){
+        const admin = await Admin.findOne({_id: adminId})
+
+        if (admin){
             const index = Math.floor(Math.random() * 5);
             const avtarBgColor = colorArray[index];
-            const firstLetter = findAdmin.name.charAt(0).toLocaleUpperCase().toString();
-            return res.status(200).send({adminName: findAdmin.name, firstLetter: firstLetter, avtarBgColor: avtarBgColor});
+            const firstLetter = admin.name.charAt(0).toLocaleUpperCase().toString();
+            return res.status(200).send({adminName: admin.name, firstLetter: firstLetter, avtarBgColor: avtarBgColor});
         }
         else{
             return res.send({message: "admin does not exist"});
@@ -129,36 +106,29 @@ app.get('/admin/me', auth, async(req, res) => {
 })
 
 
-
+// create new course
 app.post('/admin/addnewcourse', auth, async(req, res) => {
 
     try {
         const adminId = req.adminId;
         const {title, description, imageUrl, price } = req.body;
 
-        const coursesFileData = await readFile(courseDataBasePath, 'utf-8')
-        Courses = JSON.parse(coursesFileData);
-
-        const isCourseAlreadyExist = Courses.find((course) => course.courseTitle === title);
+        const isCourseAlreadyExist = await Course.findOne({title, description, imageUrl, price});
         if (isCourseAlreadyExist){
             return res.send({type : 'title', message: 'Title Already exist'});
         }
         else {
             const newCourse = {
-                courseId: Date.now().toString(),
-                courseTitle: title,
+                title,
                 description,
                 imageUrl,
                 price,
                 adminId
             }
-            Courses.push(newCourse)
-            // write the file 
-            const formatCourseData = JSON.stringify(Courses, null, 2);
-            await writeFile(courseDataBasePath, formatCourseData);
-            return res.status(200).send({type : 'success', message: 'Course created successfuly'});
-        } 
-
+            // create new course
+            const course = await Course.create(newCourse);
+            return res.status(200).send({type : 'success', message: 'Course created successfully'});
+        }
     }
     catch(error){
         console.log(error);
@@ -166,78 +136,61 @@ app.post('/admin/addnewcourse', auth, async(req, res) => {
     }    
 })
 
+// get course by course id
 app.get('/admin/getcourse/:courseId', async(req, res) => {
     try{
         const { courseId } = req.params;
-        const courseData  = await readFile(courseDataBasePath, 'utf-8');
-        Courses = JSON.parse(courseData);
-        const requestedCourse = Courses.find((course) => course.courseId === courseId);
-        res.status(200).send(requestedCourse);
-        
+        const requestedCourse = await Course.findById({_id: courseId});
+        return res.status(200).json(requestedCourse);
     }
     catch(error){
         console.log(error);
+        return res.status(500).json({message: error.message});
     }
-    
-    
 })
 
+// get all course
 app.get('/admin/getAllCourse', auth,  async(req, res) => {
     try {
         const adminId = req.adminId;
-        if (courseDataBasePath){
-            const coursesFileData = await readFile(courseDataBasePath, 'utf-8');
-            
+        console.log("admin id ", adminId)
 
-            Courses = JSON.parse(coursesFileData);
-            Courses =  Courses.filter((course) => course.adminId === adminId);
-
-            if (Courses.length !== 0){
-                return res.status(200).send({type: 'success', Courses});
-            }
-            else {
-                return res.send({type: 'error', message: 'There is no course available'});
-            }   
+        const courses = await Course.find({adminId : adminId});
+        console.log('this is all courses:', courses);
+        if (courses){
+            return res.status(200).send({type: 'success', courses});
+        }
+        else {
+            return res.send({type: 'error', message: 'There is no course available'});
         }
     }
     catch(error){
         console.log(error);
+        return res.status(500).json({message: error.message});
     }
 })
 
-app.post('/admin/updateCourse', async(req, res) => {
+app.put('/admin/updateCourse', auth, async(req, res) => {
     try {
         const { updatedCourse} = req.body;
+        console.log('this is updated course: ',  updatedCourse)
+        const course = await Course.findByIdAndUpdate({_id: updatedCourse.courseId});
+        const isCourseUpdated = await Course.findOne(updatedCourse);
 
-        // find the course that has to be update and then update it 
-        const courseData = await readFile(courseDataBasePath, 'utf-8');
-        Courses = JSON.parse(courseData);
-        
-        for (let i = 0; i < Courses.length; i++){
-            if (Courses[i].courseId === updatedCourse.courseId){
-                Courses[i] = updatedCourse;
-            }
-        }
-
-        // now write the updated courses array into course.json file 
-        const formatedData = JSON.stringify(Courses, null, 2);
-
-        if (courseDataBasePath){
-            await writeFile(courseDataBasePath, formatedData);
+        if (isCourseUpdated){
             return res.status(200).send({type : 'success', message : "course updated successfully"});
         }
-        return res.send({type : "error", message: "file not found"});
-
+        return res.status(404).json({message: "Error in Update"});
     }
     catch(error) {
         console.log(error);
+        return res.status(500).json({message: error.message});
     }
-    
 })
 
 app.post('/admin/logout', async(req, res) => {
     try {
-        return res.status(200).send({message: 'Successfuly logout'});
+        return res.status(200).send({message: 'Successfully logout'});
     }
     catch(error){
         console.log(error);

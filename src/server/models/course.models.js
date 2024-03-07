@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const AdminSchema = mongoose.Schema({
+const AdminSchema =  new mongoose.Schema({
     name: {
         type : String,
         require: true
@@ -15,7 +15,7 @@ const AdminSchema = mongoose.Schema({
     }
 });
 
-const UserSchema = mongoose.Schema({
+const UserSchema = new mongoose.Schema({
     name: {
         type : String,
         require: true
@@ -30,7 +30,7 @@ const UserSchema = mongoose.Schema({
     }
 });
 
-const CourseSchema = mongoose.Schema({
+const CourseSchema = new mongoose.Schema({
     title: {
       type : String,
       required: true
@@ -48,14 +48,14 @@ const CourseSchema = mongoose.Schema({
         type : Number,
         require: true
     },
-    adminId: { type : Schema.Types.ObjectId, ref: "Admin" }
+    adminId: { type : mongoose.Schema.Types.ObjectId, ref: "Admin" }
 });
 
 // now create models for schemas
 
-const Admin = mongoose.models(Admin, "AdminSchema");
-const User = mongoose.models(User, "UserSchema");
-const Course = mongoose.models(Course, "CourseSchema");
+const Admin = mongoose.model("Admin", AdminSchema);
+const User = mongoose.model("User", UserSchema);
+const Course = mongoose.model("Course", CourseSchema);
 
 module.exports = {
     Admin,

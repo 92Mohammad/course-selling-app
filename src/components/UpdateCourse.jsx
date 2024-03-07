@@ -16,7 +16,8 @@ export const UpdateCourse = () => {
         courseTitle: '',
         description: '',
         price: '',
-        imageUrl: ''
+        imageUrl: '',
+        adminId: ''
     });
 
 
@@ -42,7 +43,7 @@ export const UpdateCourse = () => {
                 price: editCourse.price,
                 adminId: editCourse.adminId
             }
-            dispatch(updateCourse(updatedCourse));
+           dispatch(updateCourse(updatedCourse));
         }
     }
     

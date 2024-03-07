@@ -15,7 +15,7 @@ export const adminSignup = createAsyncThunk('/admin/adminSignup', async(newAdmin
     
     try {
         const response = await axios.post('http://localhost:8080/admin/signup', {
-            adminName: newAdmin.adminName,
+            name: newAdmin.adminName,
             email: newAdmin.email,
             password: newAdmin.password
         });
