@@ -1,19 +1,22 @@
-import { useEffect,  useState } from "react";
+import React, { useEffect,  useState } from "react";
 import { updateCourse } from "../features/course/courseSlice";
 import Card from '@mui/material/Card';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { Typography } from '@mui/material';
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate  } from "react-router-dom";
 import axios from 'axios';
 import { useDispatch } from "react-redux";
 import CustomSnackBar from './CustomSnackBar';
+import {FaAnglesLeft} from "react-icons/fa6";
+
 
 
 export const UpdateCourse = () => {
     const { courseId }= useParams();
+    const Navigate = useNavigate();
     const [editCourse, setEditCourse] = useState({
-        courseTitle: '',
+        title: '',
         description: '',
         price: '',
         imageUrl: '',
@@ -34,10 +37,10 @@ export const UpdateCourse = () => {
 
         
     const handleUpdateForm = () => {
-        if (editCourse.courseTitle && editCourse.description && editCourse.imageUrl && editCourse.price){
+        if (editCourse.title && editCourse.description && editCourse.imageUrl && editCourse.price){
             const updatedCourse = {
                 courseId: courseId,
-                courseTitle: editCourse.courseTitle,
+                title: editCourse.title,
                 description: editCourse.description,
                 imageUrl: editCourse.imageUrl,
                 price: editCourse.price,
@@ -50,97 +53,101 @@ export const UpdateCourse = () => {
     
     return (
         <main className="add-new-course-section" >
-            <section className = "course-image-section" style = {{width: "100%", backgroundColor: "red"}}>
-                
+            <Button
+                variant="text"
+                color = 'secondary'
+                style = {{color:'#3333ff', fontFamily: "Nunito Sans,  sans-serif"}}
+                onClick = {() => Navigate('..')}
+            >
+                <FaAnglesLeft style = {{marginRight: 5, color: '#3333ff'}}/> Go back
+            </Button>
+            <center>
+            <Card sx={{ maxWidth: 500, padding: '20px',  marginTop: '30px', alignItems: "center"}}>
+            <Typography variant = "h4" component="h2" style={{color:  '#4d4dff', marginBottom: '30px', fontFamily: "Nunito Sans,  sans-serif"}}>Update Course Details</Typography>
 
-            </section>
-                <center>
-                <Card sx={{ maxWidth: 500, padding: '20px',  marginTop: '30px', alignItems: "center"}}>
-                <Typography variant = "h4" component="h2" style={{color:  '#4d4dff', marginBottom: '30px', fontFamily: "Nunito Sans,  sans-serif"}}>Update Course Details</Typography>
-                
-                    <TextField                           
-                        value = {editCourse.courseTitle}
-                        id="outlined-basic" 
-                        label="Title" 
-                        variant="outlined" 
-                        fullWidth 
-                        size='normal' 
-                        color="primary" 
-                        onChange = {(e) => {
-                            setEditCourse((preveCourse) => {
-                                return {
-                                    ... preveCourse,
-                                    courseTitle: e.target.value
-                                }
-                            })
-                        }}    
-                    />
-                    <br /><br />
-                    <TextField 
-                        id="outlined-basic" 
-                        label="Description" 
-                        variant="outlined" 
-                        fullWidth 
-                        color="primary" 
-                        onChange = {(e) => 
-                            setEditCourse((preveCourse) => {
-                                return {
-                                    ... preveCourse,
-                                    description: e.target.value
-                                }
-                            })
-                        }
-                        value = {editCourse.description}
-                    />
-                    <br /><br />
-                    <TextField 
-                        value = {editCourse.imageUrl}
-                        id="outlined-basic" 
-                        label="ImageUrl" 
-                        variant="outlined" 
-                        fullWidth 
-                        color="primary"  
-                        onChange = {(e) => 
-                            setEditCourse((preveCourse) => {
-                                return {
-                                    ... preveCourse,
-                                    imageUrl: e.target.value
-                                }
-                            })
-                        }
-                    />
-                    <br /><br />
-                    <TextField 
-                        id="outlined-basic" 
-                        label="Price" 
-                        variant="outlined" 
-                        fullWidth 
-                        color="primary"
-                        onChange = {(e) => 
-                            setEditCourse((preveCourse) => {
-                                return {
-                                    ... preveCourse,
-                                    price: e.target.value
-                                }
-                            })
-                        }
-                        value = {editCourse.price}
-                    />
-                    <br /><br />
-                    <Button 
-                        variant="contained"  
-                        size = "large" 
-                        style={{background: '#4d4dff'}}
-                        onClick = {() => handleUpdateForm()}
-                    >
-                        Save
-                    </Button>
-                </Card>
-                <CustomSnackBar message={"Course Updated Successfully!"}/>
+                <TextField
+                    value = {editCourse.title}
+                    id="outlined-basic"
+                    label="Title"
+                    variant="outlined"
+                    fullWidth
+                    size='normal'
+                    color="primary"
+                    onChange = {(e) => {
+                        setEditCourse((preveCourse) => {
+                            return {
+                                ... preveCourse,
+                                title: e.target.value
+                            }
+                        })
+                    }}
+                />
+                <br /><br />
+                <TextField
+                    id="outlined-basic"
+                    label="Description"
+                    variant="outlined"
+                    fullWidth
+                    color="primary"
+                    onChange = {(e) =>
+                        setEditCourse((preveCourse) => {
+                            return {
+                                ... preveCourse,
+                                description: e.target.value
+                            }
+                        })
+                    }
+                    value = {editCourse.description}
+                />
+                <br /><br />
+                <TextField
+                    value = {editCourse.imageUrl}
+                    id="outlined-basic"
+                    label="ImageUrl"
+                    variant="outlined"
+                    fullWidth
+                    color="primary"
+                    onChange = {(e) =>
+                        setEditCourse((preveCourse) => {
+                            return {
+                                ... preveCourse,
+                                imageUrl: e.target.value
+                            }
+                        })
+                    }
+                />
+                <br /><br />
+                <TextField
+                    id="outlined-basic"
+                    label="Price"
+                    variant="outlined"
+                    fullWidth
+                    color="primary"
+                    onChange = {(e) =>
+                        setEditCourse((preveCourse) => {
+                            return {
+                                ... preveCourse,
+                                price: e.target.value
+                            }
+                        })
+                    }
+                    value = {editCourse.price}
+                />
+                <br /><br />
+                <Button
+                    variant="contained"
+                    size = "large"
+                    style={{background: '#4d4dff'}}
+                    onClick = {() => handleUpdateForm()}
+                >
+                    Save
+                </Button>
+            </Card>
+            <CustomSnackBar message={"Course Updated Successfully!"}/>
 
 
 
-                </center>
+            </center>
                 
         </main>
     )

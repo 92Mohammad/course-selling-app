@@ -7,7 +7,6 @@ const connection  = () => {
             console.log("Connected Successfully");
         })
         .catch((error) => console.log(error.message));
-
 }
 
 module.exports =  connection;

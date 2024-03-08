@@ -153,10 +153,8 @@ app.get('/admin/getcourse/:courseId', async(req, res) => {
 app.get('/admin/getAllCourse', auth,  async(req, res) => {
     try {
         const adminId = req.adminId;
-        console.log("admin id ", adminId)
 
         const courses = await Course.find({adminId : adminId});
-        console.log('this is all courses:', courses);
         if (courses){
             return res.status(200).send({type: 'success', courses});
         }
@@ -170,21 +168,20 @@ app.get('/admin/getAllCourse', auth,  async(req, res) => {
     }
 })
 
-app.put('/admin/updateCourse', auth, async(req, res) => {
+app.put('/admin/updateCourse/:courseId', auth, async(req, res) => {
     try {
-        const { updatedCourse} = req.body;
-        console.log('this is updated course: ',  updatedCourse)
-        const course = await Course.findByIdAndUpdate({_id: updatedCourse.courseId});
-        const isCourseUpdated = await Course.findOne(updatedCourse);
-
+        const  updatedCourseValue = req.body;
+        const course = await Course.findByIdAndUpdate(req.params.courseId, updatedCourseValue, {new: true});
+        course.save();
+        const isCourseUpdated = await Course.findOne(updatedCourseValue);
         if (isCourseUpdated){
             return res.status(200).send({type : 'success', message : "course updated successfully"});
         }
-        return res.status(404).json({message: "Error in Update"});
+        return res.status(404).json({type : "error", message: "Error in Update"});
     }
     catch(error) {
         console.log(error);
-        return res.status(500).json({message: error.message});
+        return res.status(500).json({type : "error", message: error.message});
     }
 })
 
@@ -194,9 +191,8 @@ app.post('/admin/logout', async(req, res) => {
     }
     catch(error){
         console.log(error);
-        return res.sendStatus(404);
+        return res.status(500).json({message: error.message});
     }
-
 })
 
 app.get('/refresh/token', async(req, res) => {

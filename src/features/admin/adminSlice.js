@@ -119,7 +119,7 @@ const adminSlice = createSlice({
             .addCase(adminLogOut.fulfilled, (state, action) => {
                 console.log(action.payload);
                 const { message } = action.payload;
-                if (message === 'Successfuly logout'){
+                if (message === 'Successfully logout'){
                     // remove the authToken from local storage
                     localStorage.removeItem("authToken");
                     state.isLogout = true;

@@ -3,6 +3,7 @@ import Skeleton from '@mui/material/Skeleton';
 import EditIcon from '@mui/icons-material/Edit';
 import Fab from '@mui/material/Fab';
 import Button from '@mui/material-next/Button';
+import {Typography} from "@mui/material";
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
@@ -30,7 +31,10 @@ export const MyCourses = () => {
         
         <div style = {{ paddingTop: 20, display: 'flex', flexWrap: 'wrap', columnGap: 40, rowGap:30 , position: "fixed", bottom: 0, top: 140 , right: 20, left: 320, overflowY: 'scroll', justifyContent: 'center'}}>
         {
-            courses.map((course, index) => (
+            courses.length === 0 ? (
+                <Typography variant = "h4">No course available</Typography>
+
+            ) : (courses.map((course, index) => (
                 <Card key = {index} style ={{ width: 370, height: 350, border: '0.5px solid lightGray' , borderRadius: '10px' }}>  
                     {loading ? ( 
                         <Skeleton   sx={{ bgcolor: '#e6e6ff' }} animation="wave" variant="rectangular" width={'100%'} height={208} style={{ marginBottom: 8 }} />
@@ -45,7 +49,7 @@ export const MyCourses = () => {
                                 {
                                     loading ? (<Skeleton  sx={{ bgcolor: '#e6e6ff' , marginBottom: '3px' , width: '100%' }}  animation="wave"  variant="text" width={200} height={25}  />
                                     ) : (
-                                    <span style= {{fontSize: 18, marginBottom: 5,  color: 'black'}}>{course.courseTitle}</span>
+                                    <span style= {{fontSize: 18, marginBottom: 5,  color: 'black'}}>{course.title}</span>
                                 )}
                                 
 
@@ -73,7 +77,7 @@ export const MyCourses = () => {
                                     color = "primary"
                                     style = {{backgroundColor: "#4d4dff"}}
                                     aria-label="edit"
-                                    onClick = { () => Navigate('updatecourse/' + course.courseId)}
+                                    onClick = { () => Navigate('updatecourse/' + course._id)}
                                 >
                                     <EditIcon 
                                     />
@@ -101,8 +105,8 @@ export const MyCourses = () => {
                             }
                         </div>
                     </div>
-                </Card>        
-            ))
+                </Card>
+            )))
         }
         </div>        
     )   

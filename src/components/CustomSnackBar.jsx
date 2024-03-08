@@ -42,5 +42,4 @@ export default function CustomizedSnackbars({ message }) {
         </Snackbar>
     </div>
   );
-
 }

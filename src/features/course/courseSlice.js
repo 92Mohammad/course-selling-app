@@ -33,16 +33,20 @@ export const addNewCourse = createAsyncThunk('/course/addNewCourse', async(newCo
 
 export const updateCourse = createAsyncThunk('/course/updateCourse', async(updatedCourse) => {
     try {
-        const res = await axios.post('http://localhost:8080/admin/updateCourse', {
-
-                updatedCourse: updatedCourse,
+        const res = await axios.put('http://localhost:8080/admin/updateCourse/' +updatedCourse.courseId , {
+            title: updatedCourse.title,
+            description: updatedCourse.description,
+            imageUrl: updatedCourse.imageUrl,
+            price: updatedCourse.price,
+            adminId: updatedCourse.adminId
             }, {
 
             headers: {
-                "Content-Type" : "application/json"
+                "Content-Type" : "application/json",
+                "authorization": localStorage.getItem("authToken")
             }
         })
-        console.log("update course response from server", res);
+        console.log("update course response from server", res.data);
         return res.data;
 
     }
@@ -59,6 +63,7 @@ export const getAllCourses = createAsyncThunk('/course/getAllCourses', async() =
                 "authorization": localStorage.getItem("authToken")
             }
         })
+        console.log(response.data);
         return response.data;   
     }
     catch(error){
@@ -100,8 +105,9 @@ const courseSlice = createSlice({
             })
             .addCase(getAllCourses.fulfilled, (state, action) => {
                 const messageType = action.payload.type;
+                console.log(messageType)
                 if (messageType === 'success'){
-                    state.courses = action.payload.Courses;
+                    state.courses = action.payload.courses;
                 }
                 else {
                     console.log(action.payload.message);
