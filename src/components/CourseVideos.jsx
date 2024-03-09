@@ -5,7 +5,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useNavigate } from 'react-router-dom';
 import Card from '@mui/material/Card';
 import Skeleton from '@mui/material/Skeleton';
-import  harkiratImage  from '../images/harkirat.png'
+// import  harkiratImage  from '../images/harkirat.png'
 import { useState } from 'react';
 
 export const CourseVideos = () => {
@@ -67,7 +67,7 @@ const Video = () => {
             {loading ? ( 
                 <Skeleton   sx={{ bgcolor: '#f7ecf8' }} animation="wave" variant="rounded" width={'100%'} height={'21vh'} style={{ marginBottom: 8 }} />
                 ) : (
-                <img src= {harkiratImage} alt="course" style = {{width: '100%',  height: '21vh', borderRadius: '8px',}}/>
+                <img src= {"harkiratImage"} alt="course" style = {{width: '100%',  height: '21vh', borderRadius: '8px',}}/>
                 )
             }
         </Card>
